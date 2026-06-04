@@ -246,6 +246,7 @@ Number of instructions = 56 ÷ 4 = 14 instructions
 ---
 
 ### With -O1
+![O1 Optimization objdump](Task_1/objdump_O1in.png)
 
 From the objdump output:
 
@@ -264,6 +265,7 @@ Number of instructions = 44 ÷ 4 = 11 instructions
 ---
 
 ### With -Ofast
+![Ofast Optimization objdump](Task_1/objdump_Ofastin.png)
 
 From the objdump output:
 
@@ -282,6 +284,7 @@ Number of instructions = 32 ÷ 4 = 8 instructions
 ---
 
 ### With -Og
+![Og Optimization objdump](Task_1/objdump_Ogin.png)
 
 From the objdump output:
 
@@ -300,6 +303,7 @@ Number of instructions = 60 ÷ 4 = 15 instructions
 ---
 
 ### With -Os
+![Os Optimization objdump](Task_1/objdump_Osin.png)
 
 From the objdump output:
 
@@ -359,4 +363,4 @@ The experiment makes it clear that **compiler optimizations are not magic** — 
 
 ---
 
-*Lab performed as part of a RISC-V architecture and toolchain exploration course.*
+*Lab performed as part of a RISC-V architecture and toolchain internship.*
