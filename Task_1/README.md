@@ -87,7 +87,7 @@ gcc sum1ton.c -o sum1ton
 
 ### Screenshot — Compiling and Running with Native GCC (n = 9)
 
-![GCC x86 Compilation](Task_1/gcc_x86_compile_n9.png)
+![GCC x86 Compilation](gcc_x86_compile_n9.png)
 
 > The program was compiled natively and executed successfully, printing the sum result directly in the terminal. This confirms the C logic is correct before moving to cross-compilation.
 
@@ -121,15 +121,15 @@ spike pk sum1ton
 
 #### Screenshot — RISC-V Default Compilation and Run (n = 9)
 
-![RISC-V Default Compile n=9](Task_1/riscv_default_n9.png)
+![RISC-V Default Compile n=9](riscv_default_n9.png)
 
 #### Screenshot — Editing Source (gedit, n = 11)
 
-![Editing C Program](Task_1/gedit_edit_n11.png)
+![Editing C Program](gedit_edit_n11.png)
 
 #### Screenshot — RISC-V Default Compilation and Run (n = 11)
 
-![RISC-V Default Compile n=11](Task_1/riscv_default_n11.png)
+![RISC-V Default Compile n=11](riscv_default_n11.png)
 
 ---
 
@@ -149,7 +149,7 @@ riscv64-unknown-elf-objdump -d sum1ton_O1 | less
 
 #### Screenshot — objdump with -O1
 
-![O1 Optimization objdump](Task_1/objdump_O1.png)
+![O1 Optimization objdump](objdump_O1.png)
 
 ---
 
@@ -169,7 +169,7 @@ riscv64-unknown-elf-objdump -d sum1ton_Ofast | less
 
 #### Screenshot — objdump with -Ofast
 
-![Ofast Optimization objdump](Task_1/objdump_Ofast.png)
+![Ofast Optimization objdump](objdump_Ofast.png)
 
 ---
 
@@ -189,7 +189,7 @@ riscv64-unknown-elf-objdump -d sum1ton_Og | less
 
 #### Screenshot — objdump with -Og
 
-![Og Optimization objdump](Task_1/objdump_Og.png)
+![Og Optimization objdump](objdump_Og.png)
 
 ---
 
@@ -209,7 +209,7 @@ riscv64-unknown-elf-objdump -d sum1ton_Os | less
 
 #### Screenshot — objdump with -Os
 
-![Os Optimization objdump](Task_1/objdump_Os.png)
+![Os Optimization objdump](objdump_Os.png)
 
 ---
 
@@ -246,7 +246,7 @@ Number of instructions = 56 ÷ 4 = 14 instructions
 ---
 
 ### With -O1
-![O1 Optimization objdump](Task_1/objdump_O1in.png)
+![O1 Optimization objdump](objdump_O1in.png)
 
 From the objdump output:
 
@@ -265,7 +265,7 @@ Number of instructions = 44 ÷ 4 = 11 instructions
 ---
 
 ### With -Ofast
-![Ofast Optimization objdump](Task_1/objdump_Ofastin.png)
+![Ofast Optimization objdump](objdump_Ofastin.png)
 
 From the objdump output:
 
@@ -284,7 +284,7 @@ Number of instructions = 32 ÷ 4 = 8 instructions
 ---
 
 ### With -Og
-![Og Optimization objdump](Task_1/objdump_Ogin.png)
+![Og Optimization objdump](objdump_Ogin.png)
 
 From the objdump output:
 
@@ -303,7 +303,7 @@ Number of instructions = 60 ÷ 4 = 15 instructions
 ---
 
 ### With -Os
-![Os Optimization objdump](Task_1/objdump_Osin.png)
+![Os Optimization objdump](objdump_Osin.png)
 
 From the objdump output:
 
