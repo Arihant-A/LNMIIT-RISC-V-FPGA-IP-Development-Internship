@@ -73,7 +73,7 @@ spike pk sumlton.o
 
 #### Screenshot — Normal Execution
 
-![Normal Execution](Task_2/normal_execution.png)
+![Normal Execution](normal_execution.png)
 
 > Both the native GCC build and the RISC-V Spike simulation produce the same result, confirming correctness of the cross-compiled binary.
 
@@ -90,7 +90,7 @@ riscv64-unknown-elf-objdump -d sumlton.o | less
 
 #### Screenshot — sum1ton.o Disassembly
 
-![sum1ton.o File Contents](Task_2/sumlton_objdump.png)
+![sum1ton.o File Contents](sumlton_objdump.png)
 
 **Key observations from the disassembly:**
 
@@ -140,7 +140,7 @@ The first instruction in `<main>` is a `LUI` (Load Upper Immediate):
 
 #### Screenshot — LUI Instruction in Spike Debugger
 
-![LUI Instruction](Task_2/lui_debug.png)
+![LUI Instruction](lui_debug.png)
 
 **What LUI does:**
 
@@ -176,7 +176,7 @@ The upper 20 bits carry the page-level address, and `addi` subsequently fills in
 
 #### Screenshot — Spike Stepping Through LUI
 
-![Spike Step Debug](Task_2/spike_step_debug.png)
+![Spike Step Debug](spike_step_debug.png)
 
 ---
 
@@ -192,7 +192,7 @@ This allocates 16 bytes on the stack by subtracting 16 (0x10) from the stack poi
 
 #### Screenshot — Stack Pointer Before addi
 
-![SP Before addi](Task_2/sp_before_addi.png)
+![SP Before addi](sp_before_addi.png)
 
 **Before `addi`:**
 ```
@@ -202,7 +202,7 @@ This allocates 16 bytes on the stack by subtracting 16 (0x10) from the stack poi
 
 #### Screenshot — Stack Pointer After addi
 
-![SP After addi](Task_2/sp_after_addi.png)
+![SP After addi](sp_after_addi.png)
 
 **After `addi sp, sp, -16`:**
 ```
@@ -286,7 +286,7 @@ gcc division.c -o division
 
 #### Screenshot — GCC x86 Execution
 
-![Division with GCC](Task_2/division_gcc.png)
+![Division with GCC](division_gcc.png)
 
 ---
 
@@ -302,7 +302,7 @@ spike pk division.o
 
 #### Screenshot — Spike Execution with -Ofast
 
-![Division Spike Ofast](Task_2/division_spike_ofast.png)
+![Division Spike Ofast](division_spike_ofast.png)
 
 ---
 
@@ -318,7 +318,7 @@ spike pk division_O1.o
 
 #### Screenshot — Spike Execution with -O1
 
-![Division Spike O1](Task_2/division_spike_O1.png)
+![Division Spike O1](division_spike_O1.png)
 
 ---
 
@@ -382,7 +382,7 @@ Number of instructions = 112 ÷ 4 = 28 instructions
 
 #### Screenshot — objdump with -Ofast
 
-![Instruction Count Ofast](Task_2/instruction_count_ofast.png)
+![Instruction Count Ofast](instruction_count_ofast.png)
 
 ---
 
@@ -425,7 +425,7 @@ Number of instructions = 52 ÷ 4 = 13 instructions
 
 #### Screenshot — objdump with -O1
 
-![Instruction Count O1](Task_2/instruction_count_O1.png)
+![Instruction Count O1](instruction_count_O1.png)
 
 ---
 
@@ -501,4 +501,4 @@ Task 2 built significantly on the foundation of Task 1 by introducing interactiv
 
 ---
 
-*Lab performed as part of a RISC-V architecture and toolchain exploration course.*
+*Lab performed as part of a RISC-V architecture and toolchain internship.*
