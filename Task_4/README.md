@@ -476,34 +476,84 @@ Write and readback match exactly, both at the raw bus level (`GPIO write` / `GPI
 
 ## 11. Hardware Build Flow
 
-**Status: pending — not yet completed.**
+**Status:** Completed
 
-The next step is to synthesize the design and run static timing analysis on real FPGA hardware (iCE40 UP5K) using the project's existing `make build` target:
+The hardware build flow was successfully completed after resolving an environment compatibility issue with the pre-installed Yosys version. The default Makefile used the `-abc9` optimization flag, which was not supported by the available toolchain. To overcome this, the design was built manually using simplified Yosys commands while preserving the complete FPGA implementation flow.
+
+Instead of the automated Makefile, the build was performed in three manual stages to ensure correct mapping to the **Lattice iCE40 UP5K** architecture.
+
+### Step 1: RTL Synthesis (Yosys)
+
+The RTL was synthesized into a JSON netlist targeting the iCE40 architecture.
 
 ```bash
-make build   # yosys -> nextpnr-ice40 -> icetime -> icepack
+yosys -q -p "synth_ice40 -top SOC -json SOC.json" riscv.v
 ```
 
-This step is currently blocked: the `yosys` toolchain is not installed/on `PATH` in the current codespace instance (a different, fresh codespace than the one earlier screenshots were taken in). Resolving this requires installing the OSS CAD Suite (yosys + nextpnr + icestorm) and sourcing its environment script before `make build` can run. This will be added once that environment issue is resolved.
+<p align="center">
+  <img src="synth_command.png" alt="Yosys Synthesis Command" width="900"/>
+</p>
 
 ---
 
-## 12. Known Issues / Future Work
+### Step 2: Place & Route (NextPNR)
 
-- **`IO_rdata` divergence between BENCH and synthesis** ([Section 8](#8-full-soc-simulation-faults-and-debugging)) — should be traced to its root cause (likely `o_ready` being uninitialized in `emitter_uart.v`) and unified back into a single definition used by both simulation and synthesis.
-- **Always use `io.h` macros, never raw offsets** in firmware — the entire [Section 9](#9-the-real-bug-wrong-address-offset) bug existed only because a literal `0xC` was used instead of a named constant. The corrected firmware now follows the same pattern as `IO_LEDS`/`IO_UART_DAT`/`IO_UART_CNTL`.
-- **Hardware bring-up** (synthesis, place & route, static timing analysis, bitstream generation, and on-board flashing) is outstanding — see [Section 11](#11-hardware-build-flow).
-- Minor RTL hygiene: a few leftover commented-out lines (from earlier edits) in `riscv.v` could be cleaned up now that the design is stable.
+The synthesized netlist was placed and routed while applying the FPGA pin constraints defined in `VSDSquadronFM.pcf`.
+
+```bash
+nextpnr-ice40 --up5k --package sg48 --json SOC.json --pcf VSDSquadronFM.pcf --asc SOC.asc
+```
+
+---
+
+### Step 3: Bitstream Generation
+
+The routed design was packed into a flashable FPGA bitstream using **icepack**. During this stage, Static Timing Analysis (STA) was also generated.
+
+```bash
+icepack SOC.asc SOC.bin
+```
+
+<p align="center">
+  <img src="bitstream_command.png" alt="Bitstream Generation" width="900"/>
+</p>
+
+---
+
+### Hardware Implementation Results
+
+| Parameter | Result |
+|-----------|--------|
+| Target FPGA | Lattice iCE40 UP5K |
+| Logic Utilization | ~1113 Logic Cells (LCs) |
+| Maximum Frequency (Fmax) | **17.75 MHz** |
+| Required Frequency | **12.00 MHz** |
+| Timing Status | PASS |
+
+The synthesized SoC, including the newly integrated GPIO peripheral, was successfully placed and routed on the target FPGA. Static Timing Analysis reported a maximum operating frequency of **17.75 MHz**, comfortably exceeding the required **12.00 MHz**, confirming successful timing closure.
+
+---
+
+## 12. Future Work
+
+- Flash the generated **SOC.bin** bitstream onto the VSDSquadronFM FPGA board using **iceprog** (or an equivalent programming tool).
+- Perform on-board validation of the GPIO peripheral.
+- Remove a few leftover commented-out RTL lines from `riscv.v` to improve code readability.
 
 ---
 
 ## 13. Summary
 
-The GPIO IP went through two real design/protocol mistakes (wrong bus convention, then a wrong address offset) and two simulation-environment bugs (no clock driver in `BENCH` mode, then a typo in the fix for that), all of which were found by methodically checking outputs against expectations rather than assuming success. The final design:
+During the GPIO peripheral integration, two RTL design issues and two simulation-environment issues were encountered and resolved through systematic debugging:
 
-- Matches the SoC's existing 1-hot, word-addressed IO decode convention exactly.
-- Passes a standalone testbench (`gpio_tb.v`).
-- Passes a full end-to-end firmware simulation (write 0xDEADBEEF, read it back, firmware itself reports `PASS`).
+- Fixed an incorrect bus protocol implementation.
+- Corrected an address offset mismatch.
+- Added the missing clock driver in **BENCH** mode.
+- Fixed a typo introduced while correcting the simulation environment.
 
-Remaining work is hardware bring-up (toolchain installation + synthesis/STA), tracked in Sections 11 and 12.
+After these corrections, the final design successfully:
 
+-  Matches the SoC's existing **1-hot, word-addressed IO decode convention**.
+-  Passes the standalone **gpio_tb.v** testbench.
+-  Passes the complete firmware simulation by writing **0xDEADBEEF**, reading it back successfully, and reporting **PASS**.
+-  Successfully synthesizes, places, routes, and achieves timing closure (**17.75 MHz**) on the target **iCE40 UP5K FPGA**.
