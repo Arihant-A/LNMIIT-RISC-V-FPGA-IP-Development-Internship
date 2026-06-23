@@ -1,4 +1,4 @@
-# Task-2: Design & Integration of First Memory-Mapped IP GPIO
+# Task-4: Design & Integration of First Memory-Mapped IP GPIO
 
 
 This document walks through designing a memory-mapped GPIO peripheral IP from scratch, wiring it into an existing single-cycle RISC-V SoC, and verifying it — including the mistakes made along the way and how each one was found and fixed. The SoC is built around a FemtoRV32-style core (`riscv.v`) with an existing LED and UART peripheral, running in the `vsdfpga_labs/basicRISCV` lab environment.
@@ -41,6 +41,8 @@ Before writing any RTL, the existing SoC had to be understood — specifically, 
 **Build system overview** — `cat Makefile` to see how the existing RTL is synthesized, routed, and simulated:
 
 ![Makefile overview](image001.png)
+!(image002.png)
+!(image003.png)
 
 **Locating every Verilog module** in the project:
 
