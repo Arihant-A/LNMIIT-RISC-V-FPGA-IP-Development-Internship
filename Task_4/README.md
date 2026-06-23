@@ -41,8 +41,8 @@ Before writing any RTL, the existing SoC had to be understood — specifically, 
 **Build system overview** — `cat Makefile` to see how the existing RTL is synthesized, routed, and simulated:
 
 ![Makefile overview](image001.png)
-!(image002.png)
-!(image003.png)
+![Makefile overview](image002.png)
+![Makefile overview](image003.png)
 
 **Locating every Verilog module** in the project:
 
