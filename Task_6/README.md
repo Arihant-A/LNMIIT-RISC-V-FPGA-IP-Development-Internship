@@ -904,3 +904,86 @@ Result: `make combined_test.bram.hex`
 Result: `iverilog -DBENCH -o soc_sim riscv.v pwm_ip.v soc_tb.v && vvp soc_sim`
 
 ![Combined full-SoC simulation — all tests pass, no cross-talk between GPIO and PWM](12.png)
+
+
+---
+
+## 14. Synthesis
+
+With both IPs `` `include``d into `riscv.v` and simulation fully validated, the design was taken through synthesis, place-and-route, and static timing analysis targeting the iCE40 UP5K on the VSDSquadron FM board.
+
+The `Makefile`'s `build` target invokes `synth_ice40` with `-abc9`, which this yosys build doesn't support in combination with `synth_ice40` (`ERROR: Command syntax error`). As in Task 4, the fix is to run the same stages manually without that flag:
+
+```bash
+yosys -q -p "synth_ice40 -device u -dsp -top SOC -json SOC.json" riscv.v
+nextpnr-ice40 --force --json SOC.json --pcf VSDSquadronFM.pcf --asc SOC.asc --freq 10 --up5k --package sg48 --opt-timing
+icetime -p VSDSquadronFM.pcf -P sg48 -r SOC.timings -d up5k -t SOC.asc
+icepack -s SOC.asc SOC.bin
+```
+
+### Synthesis and packing
+
+`yosys` maps `riscv.v` (CPU core, LEDS/UART, and now `gpio_ip`/`pwm_ip`) onto iCE40 primitives, and `nextpnr-ice40` constrains the top-level ports to the board's actual pins per `VSDSquadronFM.pcf`:
+
+```
+Info: constrained 'LEDS[0]' to bel 'X4/Y31/io0'
+Info: constrained 'LEDS[1]' to bel 'X6/Y31/io0'
+Info: constrained 'LEDS[2]' to bel 'X5/Y31/io0'
+Info: constrained 'LEDS[3]' to bel 'X19/Y31/io1'
+Info: constrained 'LEDS[4]' to bel 'X18/Y31/io0'
+Info: constrained 'RESET' to bel 'X19/Y31/io0'
+Info: constrained 'CLK' to bel 'X17/Y31/io0'
+Info: constrained 'TXD' to bel 'X9/Y0/io0'
+Info: constrained 'RXD' to bel 'X9/Y0/io1'
+```
+
+Device utilization on the UP5K, with both new IPs included:
+
+```
+ICESTORM_LC:  1213/5280   23%
+ICESTORM_RAM:   16/30     53%
+SB_IO:           9/96      9%
+SB_GB:           6/8      75%
+ICESTORM_PLL:    0/1       0%
+ICESTORM_HFOSC:  1/1     100%
+```
+
+Comfortably within budget — no LC, RAM, or IO pressure from adding GPIO and PWM.
+
+![nextpnr-ice40 — IO constraints and device utilization](13.png)
+
+### Timing closure
+
+`nextpnr-ice40` reports the achievable clock frequency after placement and routing:
+
+```
+Info: Max frequency for clock 'clk': 15.51 MHz (PASS at 12.00 MHz)
+
+Info: Max delay <async>     -> posedge clk: 4.07 ns
+Info: Max delay posedge clk -> <async>    : 17.83 ns
+```
+
+15.51 MHz clears the 12 MHz requirement with margin, though it's tighter than Task 4's GPIO-only build (17.75 MHz) — consistent with the extra decode and counter logic PWM adds to the bus. `icetime`'s independent static timing analysis corroborates this:
+
+```
+Warning: timing analysis not supported for cell type HFOSC
+// Timing estimate: 62.88 ns (15.90 MHz)
+```
+
+(The HFOSC warning is expected — `icetime` doesn't model the internal oscillator primitive's timing, so it estimates the rest of the logic around it; nextpnr's own report already accounts for the derived 12 MHz HFOSC constraint.)
+
+![nextpnr-ice40 — timing report and slack histogram](14.png)
+
+### Bitstream generation
+
+```bash
+root@codespaces-a8c01c:...RTL# icetime -p VSDSquadronFM.pcf -P sg48 -r SOC.timings -d up5k -t SOC.asc
+// Timing estimate: 62.88 ns (15.90 MHz)
+root@codespaces-a8c01c:...RTL# icepack -s SOC.asc SOC.bin
+root@codespaces-a8c01c:...RTL# ls -la SOC.bin
+-rw-rw-rw- 1 root root 104090 Jul  4 10:28 SOC.bin
+```
+
+`SOC.bin` (104,090 bytes) is the final bitstream, ready to flash.
+
+![icetime timing estimate + icepack producing SOC.bin](15.png)
