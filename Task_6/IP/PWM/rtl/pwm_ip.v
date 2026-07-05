@@ -25,12 +25,12 @@ module pwm_ip (
     always @(posedge clk) begin
         if (!resetn) begin
             ctrl   <= 32'h0;
-            period <= 32'h1;  
+            period <= 32'h1;
             duty   <= 32'h0;
-        end else begin
-            if (wr && mem_addr[5:2] == (OFF_CTRL>>2))   ctrl   <= mem_wdata;
-            if (wr && mem_addr[5:2] == (OFF_PERIOD>>2)) period <= (mem_wdata == 0) ? 32'h1 : mem_wdata;
-            if (wr && mem_addr[5:2] == (OFF_DUTY>>2))   duty   <= mem_wdata;
+        end else if (wr && mem_addr[11:4] == 8'h0) begin
+            if (mem_addr[3:2] == (OFF_CTRL>>2))   ctrl   <= mem_wdata;
+            if (mem_addr[3:2] == (OFF_PERIOD>>2)) period <= (mem_wdata == 0) ? 32'h1 : mem_wdata;
+            if (mem_addr[3:2] == (OFF_DUTY>>2))   duty   <= mem_wdata;
             // OFF_STATUS: read-only
         end
     end
@@ -46,16 +46,16 @@ module pwm_ip (
 
     wire pwm_raw = (cnt < duty);
     wire pwm_active = pol ? ~pwm_raw : pwm_raw;
-    assign pwm_out = en ? pwm_active : (pol ? 1'b1 : 1'b0); // forced inactive level when disabled
-
+    assign pwm_out = en ? pwm_active : (pol ? 1'b1 : 1'b0); 
+    
     always @(*) begin
-        if (!pwm_sel) pwm_rdata = 32'h0;
-        else case (mem_addr[5:2])
+        if (!pwm_sel || mem_addr[11:4] != 8'h0) pwm_rdata = 32'h0;   
+        else case (mem_addr[3:2])
             (OFF_CTRL>>2):   pwm_rdata = ctrl;
             (OFF_PERIOD>>2): pwm_rdata = period;
             (OFF_DUTY>>2):   pwm_rdata = duty;
-            (OFF_STATUS>>2): pwm_rdata = {16'h0, cnt[15:0], 15'h0, en};
+            (OFF_STATUS>>2): pwm_rdata = {cnt[15:0], 15'h0, en};
             default:         pwm_rdata = 32'h0;
         endcase
-    end
+    end    
 endmodule
