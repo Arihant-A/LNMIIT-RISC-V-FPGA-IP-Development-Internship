@@ -1,1 +1,1 @@
-The RTL and tests code are stored in this directory.
+The RTL, test benches and tests C code are stored in this directory.
