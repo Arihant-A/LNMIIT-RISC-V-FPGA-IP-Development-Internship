@@ -1017,9 +1017,13 @@ The GPIO tests will execute invisibly in the background, validating the data dir
 The PWM duty cycle sweep will be physically observable. If the PWM output is routed to an onboard LED, you will see it "breathe" (gradually increase and decrease in brightness) as the DUTY register is stepped from 0 to 1000. If routed to an external pin, this sweep can be verified using a logic analyzer or oscilloscope.
 
 ![make clean+make build](hw1.png)
+
 ![sudo make flash](hw2.png)
+
 ![Low Brightness](fpga1.jpg)
+
 ![Highness Brightness](fpga2.jpg)
+
 
 ## 16. Conclusion
 
