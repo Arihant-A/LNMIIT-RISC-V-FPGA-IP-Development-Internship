@@ -14,7 +14,8 @@
 11. [Full-SoC Simulation — Individual Firmware](#11-full-soc-simulation--individual-firmware)
 12. [Bug Found During Full-SoC PWM Validation, and the Fix](#12-bug-found-during-full-soc-pwm-validation-and-the-fix)
 13. [Combined Firmware Validation](#13-combined-firmware-validation)
-
+14. [Synthesis](#14-Synthesis)
+15. [Hardware](#15-Hardware)
 ---
 
 ## 1. Objective
@@ -987,3 +988,52 @@ root@codespaces-a8c01c:...RTL# ls -la SOC.bin
 `SOC.bin` (104,090 bytes) is the final bitstream, ready to flash.
 
 ![icetime timing estimate + icepack producing SOC.bin](15.png)
+
+## 15. Hardware
+
+With the bitstream (SOC.bin) successfully generated and timing constraints met, the final step is to flash the design onto the VSDSquadron FM board.
+
+We can automate the cleanup, build, and programming processes using the included Makefile. Ensure the board is connected via USB and configured correctly before proceeding.
+
+Run the following commands in your terminal:
+
+Run the following commands in your terminal:
+
+Bash
+# Clean up any old build artifacts, binaries, and logs
+make clean
+
+# Re-build the firmware and synthesize the bitstream 
+make build
+
+# Flash the generated bitstream (SOC.bin) to the iCE40 board
+sudo make flash
+
+Expected Hardware Behavior:
+Once flashed, the processor will boot and load the compiled firmware (combined_test.c).
+
+The GPIO tests will execute invisibly in the background, validating the data direction and readback logic.
+
+The PWM duty cycle sweep will be physically observable. If the PWM output is routed to an onboard LED, you will see it "breathe" (gradually increase and decrease in brightness) as the DUTY register is stepped from 0 to 1000. If routed to an external pin, this sweep can be verified using a logic analyzer or oscilloscope.
+
+![make clean+make build](hw1.png)
+![sudo make flash](hw2.png)
+![Low Brightness](fpga1.jpg)
+![Highness Brightness](fpga2.jpg)
+
+## 16. Conclusion
+
+Task 6 successfully demonstrates the transition from legacy, tightly coupled peripheral logic to a modular and scalable IP integration strategy. By implementing a 4KB-aligned windowed address decoding scheme, the RISC-V SoC can now seamlessly support multiple independent memory-mapped peripherals without address aliasing or bus conflicts.
+
+Key Achievements:
+
+IP Development: Designed and validated two independent hardware blocks: a 3-register GPIO IP (supporting dynamic input/output switching) and a 4-register PWM IP (supporting programmable duty cycle, period, and polarity).
+
+Robust Verification: Validated the designs at multiple levels of abstraction—from standalone RTL testbenches to full-SoC simulations running compiled C firmware.
+
+Integration Debugging: Successfully identified and patched a simulation-specific bus routing bug (ifdef BENCH) that masked the PWM readback capability, ensuring parity between simulation and physical hardware behavior.
+
+Hardware Realization: Successfully synthesized the updated SoC, cleanly meeting the 12 MHz timing requirements (achieving 15.51 MHz) with minimal resource overhead, and generated the final bitstream for the iCE40 UP5K board.
+
+With the GPIO and PWM IPs fully integrated, validated, and flashed, the foundation is laid for developing and integrating even more complex communication and control peripherals in future tasks.
+
