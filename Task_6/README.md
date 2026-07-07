@@ -155,9 +155,9 @@ module pwm_ip (
 
     always @(posedge clk) begin
         if (!resetn) begin
-            ctrl   <= 32'h0;
-            period <= 32'h1;
-            duty   <= 32'h0;
+            ctrl   <= 32'h3;       // Bit 0 (EN)=1, Bit 1 (POL)=1
+            period <= 32'd1000;    // 1000 ticks period
+            duty   <= 32'd100;     // 100 ticks duty (10% brightness)
         end else if (wr && mem_addr[11:4] == 8'h0) begin
             if (mem_addr[3:2] == (OFF_CTRL>>2))   ctrl   <= mem_wdata;
             if (mem_addr[3:2] == (OFF_PERIOD>>2)) period <= (mem_wdata == 0) ? 32'h1 : mem_wdata;
@@ -177,10 +177,10 @@ module pwm_ip (
 
     wire pwm_raw = (cnt < duty);
     wire pwm_active = pol ? ~pwm_raw : pwm_raw;
-    assign pwm_out = en ? pwm_active : (pol ? 1'b1 : 1'b0); 
-    
+    assign pwm_out = en ? pwm_active : (pol ? 1'b1 : 1'b0);
+
     always @(*) begin
-        if (!pwm_sel || mem_addr[11:4] != 8'h0) pwm_rdata = 32'h0;   
+        if (!pwm_sel || mem_addr[11:4] != 8'h0) pwm_rdata = 32'h0;
         else case (mem_addr[3:2])
             (OFF_CTRL>>2):   pwm_rdata = ctrl;
             (OFF_PERIOD>>2): pwm_rdata = period;
@@ -188,8 +188,9 @@ module pwm_ip (
             (OFF_STATUS>>2): pwm_rdata = {cnt[15:0], 15'h0, en};
             default:         pwm_rdata = 32'h0;
         endcase
-    end    
+    end
 endmodule
+
 ```
 
 Key design points:
