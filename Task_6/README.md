@@ -16,6 +16,8 @@
 13. [Combined Firmware Validation](#13-combined-firmware-validation)
 14. [Synthesis](#14-Synthesis)
 15. [Hardware](#15-Hardware)
+16. [Terminal](#16-Terminal)
+17. [Conclusion](#17-Conclusion)
 ---
 
 ## 1. Objective
@@ -999,8 +1001,22 @@ The PWM duty cycle sweep will be physically observable. If the PWM output is rou
 
 ![Highness Brightness](fpga2.jpg)
 
+## 16. Terminal
+During the full-SoC hardware validation on the VSDSquadron FM (iCE40 UP5K) board, two critical board-level integration issues were identified and resolved regarding UART communication:
 
-## 16. Conclusion
+### 1. UART Baud Rate vs. Internal Oscillator Stability
+Initially, the UART was configured for a high-speed baud rate of `1,000,000`. However, the SoC is clocked using the iCE40's internal high-frequency oscillator (`SB_HFOSC`) running at 12 MHz.
+* At **1,000,000 baud**, the hardware only has **12 clock cycles per bit** (12 MHz / 1 MHz). Internal oscillators inherently possess a 5% to 10% frequency variance depending on temperature and voltage. With only 12 cycles to sample a bit, this tiny variance causes severe synchronization loss and silent data drops between the FPGA and the PC.
+* **The Fix:** The baud rate was dialed back to **9600 baud**. This provides approximately **1250 clock cycles per bit**, creating a massive oversampling margin that easily absorbs the internal oscillator's frequency drift. This change guarantees perfectly stable serial communication without needing an external crystal oscillator.
+
+### 2. The FT232H "Shared Pin" Architecture (.pcf Routing)
+Initially, the UART TX and RX signals were routed to generic I/O pins (Pins 3 and 4) in the `.pcf` file. While the RTL logic was transmitting perfectly, the PC terminal remained completely blank.
+* **The Root Cause:** The board utilizes an onboard FT232H chip as a USB bridge. This is a single-channel device. During `make flash`, the PC puts this chip into SPI Programmer mode to load the bitstream into the flash memory. Once the FPGA boots, the chip switches into a standard USB-to-UART serial converter. Because it lacks extra dedicated routing channels, it **physically reuses the SPI pins** for this UART communication.
+* **The Fix:** Pins 3 and 4 are generic floating headers with no physical connection to the USB bridge. The `.pcf` constraints were updated to route `TXD` to **Pin 14** (hardware `SPI_SO`) and `RXD` to **Pin 15** (hardware `SPI_SCK`). This successfully routes the FPGA's internal UART signals back through the FTDI chip and out to the host PC.
+
+![Output Printed](terminal.jpg)
+
+## 17. Conclusion
 
 Task 6 successfully demonstrates the transition from legacy, tightly coupled peripheral logic to a modular and scalable IP integration strategy. By implementing a 4KB-aligned windowed address decoding scheme, the RISC-V SoC can now seamlessly support multiple independent memory-mapped peripherals without address aliasing or bus conflicts.
 
