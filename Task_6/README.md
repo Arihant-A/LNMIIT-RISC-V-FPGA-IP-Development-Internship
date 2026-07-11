@@ -1014,7 +1014,7 @@ Initially, the UART TX and RX signals were routed to generic I/O pins (Pins 3 an
 * **The Root Cause:** The board utilizes an onboard FT232H chip as a USB bridge. This is a single-channel device. During `make flash`, the PC puts this chip into SPI Programmer mode to load the bitstream into the flash memory. Once the FPGA boots, the chip switches into a standard USB-to-UART serial converter. Because it lacks extra dedicated routing channels, it **physically reuses the SPI pins** for this UART communication.
 * **The Fix:** Pins 3 and 4 are generic floating headers with no physical connection to the USB bridge. The `.pcf` constraints were updated to route `TXD` to **Pin 14** (hardware `SPI_SO`) and `RXD` to **Pin 15** (hardware `SPI_SCK`). This successfully routes the FPGA's internal UART signals back through the FTDI chip and out to the host PC.
 
-![Output Printed](terminal.jpg)
+![Output Printed](terminal.png)
 
 ## 17. Conclusion
 
