@@ -26,6 +26,9 @@ This repository documents a hands-on RISC-V FPGA internship progressing from too
 
 ---
 
+## Video Link
+https://drive.google.com/file/d/1T24XkmOKFsO85MZ68yUoNx_O-tQOqUEX/view?usp=drive_link
+
 ## Tools & Environment
 
 - **RISC-V Toolchain:** `riscv64-unknown-elf-gcc`, `objdump`
